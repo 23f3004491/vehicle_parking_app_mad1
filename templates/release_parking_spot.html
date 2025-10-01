@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Release Parking Spot{% endblock %}
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h4 class="mb-3">Release the Parking Spot</h4>
+        <form method="POST" action="{{ url_for('release_parking_spot') }}">
+            <div class="mb-3">
+                <label class="form-label">Spot ID</label>
+                <input type="text" class="form-control" name="spot_id" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Vehicle Number</label>
+                <input type="text" class="form-control" name="vehicle_number" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Parking Start</label>
+                <input type="datetime-local" class="form-control" name="parking_start" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Total Used (hrs)</label>
+                <input type="number" class="form-control" name="total_used" required>
+            </div>
+            <button type="submit" class="btn btn-danger">Release</button>
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

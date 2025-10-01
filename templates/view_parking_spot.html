@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}View/Update Parking Spot{% endblock %}
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h4 class="mb-3">View / Update Parking Spot</h4>
+        <form method="POST" action="{{ url_for('view_parking_spot') }}">
+            <div class="mb-3">
+                <label class="form-label">Spot ID</label>
+                <input type="text" class="form-control" name="spot_id" value="{{ spot_id|default('A1') }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="Occupied" {% if status=='Occupied' %}selected{% endif %}>Occupied</option>
+                    <option value="Free" {% if status=='Free' %}selected{% endif %}>Free</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

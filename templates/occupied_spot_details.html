@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Occupied Parking Spot Details{% endblock %}
+{% block content %}
+<div class="d-flex flex-column justify-content-center align-items-center min-vh-100">
+    <div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+        <h4 class="mb-3">Occupied Parking Spot Details</h4>
+        <form>
+            <div class="mb-3">
+                <label class="form-label">Spot ID</label>
+                <input type="text" class="form-control" value="{{ spot_id|default('A1') }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Vehicle Number</label>
+                <input type="text" class="form-control" value="{{ vehicle_number|default('MH12AB1234') }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Entry Time</label>
+                <input type="text" class="form-control" value="{{ entry_time|default('10:00') }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Exit Time</label>
+                <input type="text" class="form-control" value="{{ exit_time|default('12:00') }}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">User Email</label>
+                <input type="text" class="form-control" value="{{ user_email|default('user@email.com') }}" readonly>
+            </div>
+            <button type="button" class="btn btn-secondary w-100" onclick="window.history.back()">Close</button>
+        </form>
+    </div>
+</div>
+{% endblock %} 

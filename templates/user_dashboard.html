@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% block title %}User Dashboard - Vehicle Parking System{% endblock %}
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('user_dashboard') }}">User Dashboard</a>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <li class="nav-item"><a class="nav-link active" href="{{ url_for('user_dashboard') }}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('user_search') }}">Search</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('user_history') }}">History</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('user_stats') }}">Summary</a></li>
+            <li class="nav-item"><a class="nav-link text-warning" href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Recent Parking History</span>
+                <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#bookModal">Book New Spot</button>
+            </div>
+            <div class="card-body p-0">
+                {% if reservations %}
+                <table class="table table-sm mb-0">
+                    <thead>
+                        <tr><th>#</th><th>Location</th><th>Parking Spot</th><th>Entry</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ reservation.parking_lot.prime_location_name if reservation.parking_lot else 'N/A' }}</td>
+                            <td>{{ reservation.parking_spot.spot_number if reservation.parking_spot else 'N/A' }}</td>
+                            <td>{{ reservation.parking_timestamp.strftime('%H:%M') if reservation.parking_timestamp else 'N/A' }}</td>
+                            <td>
+                                <span class="badge {% if reservation.status == 'active' %}bg-success{% elif reservation.status == 'completed' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                    {{ reservation.status.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if reservation.status == 'active' %}
+                                <form method="POST" action="{{ url_for('release_parking_spot') }}" style="display: inline;">
+                                    <input type="hidden" name="reservation_id" value="{{ reservation.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to release this spot?')">Release</button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="p-3 text-center text-muted">
+                    <p>No parking history found.</p>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookModal">Book Your First Spot</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">Available Parking Lots</div>
+            <div class="card-body">
+                {% if parking_lots_with_stats %}
+                <div class="row g-2">
+                    {% for lot_data in parking_lots_with_stats %}
+                    <div class="col-12">
+                        <div class="card border">
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1">{{ lot_data.lot.prime_location_name }}</h6>
+                                <small class="text-muted">{{ lot_data.lot.address }}</small>
+                                <div class="mt-2">
+                                    <span class="badge bg-info">${{ "%.2f"|format(lot_data.lot.price_per_hour) }}/hr</span>
+                                    <span class="badge {% if lot_data.available_spots_count > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ lot_data.available_spots_count }} spots available
+                                    </span>
+                                    <span class="badge bg-secondary">{{ lot_data.occupied_spots_count }} occupied</span>
+                                </div>
+                                {% if lot_data.available_spots_count > 0 %}
+                                <button class="btn btn-outline-success btn-sm mt-2 w-100" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#bookModal"
+                                        data-lot-id="{{ lot_data.lot.id }}"
+                                        data-lot-name="{{ lot_data.lot.prime_location_name }}">
+                                    Book Spot
+                                </button>
+                                {% else %}
+                                <button class="btn btn-outline-secondary btn-sm mt-2 w-100" disabled>
+                                    No Spots Available
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No parking lots available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Your Statistics</div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ reservations|length }}</h4>
+                        <small class="text-muted">Total Bookings</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">
+                            {{ reservations|selectattr('status', 'equalto', 'active')|list|length }}
+                        </h4>
+                        <small class="text-muted">Active Bookings</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-info">{{ parking_lots_with_stats|length }}</h4>
+                        <small class="text-muted">Available Lots</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">
+                            {% set total_spots = 0 %}
+                            {% for lot_data in parking_lots_with_stats %}
+                                {% set total_spots = total_spots + lot_data.available_spots_count %}
+                            {% endfor %}
+                            {{ total_spots }}
+                        </h4>
+                        <small class="text-muted">Total Spots</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Quick Actions</div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#bookModal">
+                        <i class="fas fa-car me-2"></i>Book New Spot
+                    </button>
+                    <a href="{{ url_for('user_history') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-history me-2"></i>View History
+                    </a>
+                    <a href="{{ url_for('user_stats') }}" class="btn btn-outline-info">
+                        <i class="fas fa-chart-bar me-2"></i>View Statistics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Book Parking Spot Modal -->
+<div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="bookModalLabel">Book Parking Spot</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('book_parking_spot') }}">
+          <div class="mb-3">
+            <label class="form-label">Parking Lot</label>
+            <select class="form-control" name="parking_lot_id" required>
+              <option value="">Select Parking Lot</option>
+              {% for lot_data in parking_lots_with_stats %}
+              <option value="{{ lot_data.lot.id }}">{{ lot_data.lot.prime_location_name }} - ${{ "%.2f"|format(lot_data.lot.price_per_hour) }}/hr</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parking Spot</label>
+            <select class="form-control" name="parking_spot_id" required>
+              <option value="">Select Parking Spot</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parking Start Time</label>
+            <input type="datetime-local" class="form-control" name="parking_timestamp" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Vehicle Number</label>
+            <input type="text" class="form-control" name="vehicle_number" placeholder="Enter vehicle number" required>
+          </div>
+          <button type="submit" class="btn btn-success">Book Spot</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Release Parking Spot Modal -->
+<div class="modal fade" id="releaseModal" tabindex="-1" aria-labelledby="releaseModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="releaseModalLabel">Release Parking Spot</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" action="{{ url_for('release_parking_spot') }}">
+          <div class="mb-3">
+            <label class="form-label">Reservation ID</label>
+            <input type="text" class="form-control" name="reservation_id" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Vehicle Number</label>
+            <input type="text" class="form-control" name="vehicle_number" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Parking Start Time</label>
+            <input type="datetime-local" class="form-control" name="parking_start" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Total Hours Used</label>
+            <input type="number" step="0.5" class="form-control" name="hours_used" required>
+          </div>
+          <button type="submit" class="btn btn-danger">Release Spot</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load parking spots when parking lot is selected
+document.querySelector('select[name="parking_lot_id"]').addEventListener('change', function() {
+    const lotId = this.value;
+    const spotSelect = document.querySelector('select[name="parking_spot_id"]');
+    
+    if (lotId) {
+        fetch(`/api/parking-lots/${lotId}/spots`)
+            .then(response => response.json())
+            .then(data => {
+                spotSelect.innerHTML = '<option value="">Select Parking Spot</option>';
+                data.forEach(spot => {
+                    const option = document.createElement('option');
+                    option.value = spot.id;
+                    option.textContent = `Spot ${spot.spot_number} ${spot.is_available ? '(Available)' : '(Occupied)'}`;
+                    option.disabled = !spot.is_available;
+                    spotSelect.appendChild(option);
+                });
+            });
+    } else {
+        spotSelect.innerHTML = '<option value="">Select Parking Spot</option>';
+    }
+});
+
+// Set current datetime as default for parking start time
+document.querySelector('input[name="parking_timestamp"]').value = new Date().toISOString().slice(0, 16);
+
+// Auto-fill parking lot when booking from lot card
+document.querySelectorAll('[data-lot-id]').forEach(button => {
+    button.addEventListener('click', function() {
+        const lotId = this.getAttribute('data-lot-id');
+        const lotName = this.getAttribute('data-lot-name');
+        const lotSelect = document.querySelector('select[name="parking_lot_id"]');
+        lotSelect.value = lotId;
+        lotSelect.dispatchEvent(new Event('change'));
+    });
+});
+
+// Form validation
+document.querySelector('#bookModal form').addEventListener('submit', function(e) {
+    const vehicleNumber = document.querySelector('input[name="vehicle_number"]').value;
+    const parkingLot = document.querySelector('select[name="parking_lot_id"]').value;
+    const parkingSpot = document.querySelector('select[name="parking_spot_id"]').value;
+    const parkingTimestamp = document.querySelector('input[name="parking_timestamp"]').value;
+    
+    if (!vehicleNumber || !parkingLot || !parkingSpot || !parkingTimestamp) {
+        e.preventDefault();
+        alert('Please fill in all required fields');
+        return false;
+    }
+    
+    // Vehicle number validation
+    if (vehicleNumber.length < 3) {
+        e.preventDefault();
+        alert('Please enter a valid vehicle number');
+        return false;
+    }
+    
+    return true;
+});
+</script>
+{% endblock %} 
