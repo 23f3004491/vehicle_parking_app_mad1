@@ -5,23 +5,23 @@ A comprehensive web-based vehicle parking management system built with Flask.  T
 ## Features
 
 ### User Features
-- 🔐 User registration and authentication
-- 🚗 Browse available parking lots and spots
-- 📍 View parking lot locations with address and pricing information
-- 🎫 Book parking spots with vehicle details
-- ⏱️ Real-time availability tracking
-- 💰 Automatic cost calculation based on parking duration
-- 📊 View personal parking history and statistics
-- 🔓 Release parking spots and complete reservations
+- User registration and authentication
+- Browse available parking lots and spots
+- View parking lot locations with address and pricing information
+- Book parking spots with vehicle details
+- Real-time availability tracking
+- Automatic cost calculation based on parking duration
+- View personal parking history and statistics
+- Release parking spots and complete reservations
 
 ### Admin Features
-- 👨‍💼 Separate admin authentication system
-- 🏢 Create and manage parking lots
-- 🅿️ Add and configure parking spots for each lot
-- 📈 View comprehensive statistics and analytics
-- 🔍 Monitor all reservations and user activities
-- 💵 Track revenue and usage patterns
-- ⚙️ Activate/deactivate parking lots and spots
+- Separate admin authentication system
+- Create and manage parking lots
+- Add and configure parking spots for each lot
+- View comprehensive statistics and analytics
+- Monitor all reservations and user activities
+- Track revenue and usage patterns
+- Activate/deactivate parking lots and spots
 
 ## Technology Stack
 
@@ -162,25 +162,7 @@ vehicle_parking_app_mad1/
 - **Password Security**: Werkzeug password hashing for secure authentication
 - **Role-based Access**:  Separate dashboards and permissions for users and admins
 - **Responsive Forms**: WTForms validation for data integrity
-
-## Future Enhancements
-
-- Payment gateway integration
-- Email notifications for booking confirmations
-- Mobile app support
-- Advanced search and filtering options
-- Parking spot reservation in advance
-- QR code-based entry/exit system
-- Multi-language support
-
-## Contributing
-
-Feel free to fork this repository and submit pull requests for any improvements. 
-
+  
 ## License
 
 This project is created for educational purposes as part of MAD1 (Modern Application Development 1) coursework. 
-
-## Contact
-
-For any queries, please reach out through GitHub issues. 
